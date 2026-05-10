@@ -1,0 +1,49 @@
+<div class="page-header">
+  <h2>Log de Auditoría</h2>
+  <div class="filtros">
+    <input type="text" placeholder="Filtrar por tabla..." [(ngModel)]="tablaFiltro" />
+    <button class="btn-primary" (click)="pagina=1; cargar()">Buscar</button>
+  </div>
+</div>
+
+<div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+<div class="card">
+  <div *ngIf="cargando" class="loading-text">Cargando registros...</div>
+
+  <table class="tabla" *ngIf="!cargando">
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Tabla</th>
+        <th>Acción</th>
+        <th>ID Registro</th>
+        <th>Usuario</th>
+        <th>Módulo</th>
+        <th>Descripción</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let log of logs">
+        <td>{{ log.fechaAccion | date:'dd/MM/yyyy HH:mm' }}</td>
+        <td><code>{{ log.tabla }}</code></td>
+        <td>
+          <span class="badge" [ngClass]="'badge-' + log.accion?.toLowerCase()">{{ log.accion }}</span>
+        </td>
+        <td>{{ log.idRegistro ?? '-' }}</td>
+        <td>{{ log.nombreUsuario ?? '-' }}</td>
+        <td>{{ log.moduloOrigen }}</td>
+        <td>{{ log.descripcion }}</td>
+      </tr>
+      <tr *ngIf="logs.length === 0">
+        <td colspan="7" class="empty-text">No hay registros de auditoría.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="paginacion" *ngIf="!cargando">
+    <button (click)="anterior()" [disabled]="pagina === 1">← Anterior</button>
+    <span>Página {{ pagina }}</span>
+    <button (click)="siguiente()" [disabled]="logs.length < tamano">Siguiente →</button>
+  </div>
+</div>

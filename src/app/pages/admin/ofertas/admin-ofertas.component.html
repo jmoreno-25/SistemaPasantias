@@ -1,0 +1,188 @@
+﻿<div class="page-header">
+  <h1>Ofertas de Pasantía</h1>
+  <p>Gestionar las ofertas publicadas en el sistema</p>
+</div>
+
+<div *ngIf="mensaje" class="alert" [class.alert-error]="esError" [class.alert-success]="!esError">{{ mensaje }}</div>
+
+<div class="toolbar">
+  <div class="toolbar-left">
+    <input type="text" [(ngModel)]="busqueda" placeholder="Buscar por título o empresa..." class="input-search">
+    <select [(ngModel)]="filtroEstado" class="select-filtro">
+      <option value="">Todos los estados</option>
+      <option value="Abierta">Abierta</option>
+      <option value="Cerrada">Cerrada</option>
+      <option value="Cancelada">Cancelada</option>
+    </select>
+  </div>
+  <div class="toolbar-right">
+    <button class="btn btn-primary" (click)="nuevaOferta()"><span class="material-icons">add</span> Nueva Oferta</button>
+  </div>
+</div>
+
+<div class="table-container" *ngIf="!cargando">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Título</th>
+        <th>Empresa</th>
+        <th>Modalidad</th>
+        <th>Remunerada</th>
+        <th>Fecha Inicio</th>
+        <th>Fecha Fin</th>
+        <th>Cupos</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let o of ofertasFiltradas">
+        <td>{{ o.titulo }}</td>
+        <td>{{ o.nombreEmpresa || "—" }}</td>
+        <td><span class="badge-modalidad">{{ o.modalidad }}</span></td>
+        <td>
+          <span class="material-icons remunerada-icon" [class.remunerada-si]="o.remuneracion" [class.remunerada-no]="!o.remuneracion" [title]="o.remuneracion ? 'Sí' : 'No'">
+            {{ o.remuneracion ? 'attach_money' : 'money_off' }}
+          </span>
+        </td>
+        <td>{{ o.fechaInicio | date:"dd/MM/yyyy" }}</td>
+        <td>{{ o.fechaFin | date:"dd/MM/yyyy" }}</td>
+        <td>{{ o.cupos }}</td>
+        <td><span class="badge" [ngClass]="getEstadoClass(o.estado || '')">{{ o.estado }}</span></td>
+        <td class="acciones">
+          <button class="btn-icon btn-edit" (click)="editarOferta(o)" title="Editar">
+            <span class="material-icons">edit</span>
+          </button>
+          <button class="btn-icon btn-delete" (click)="eliminarOferta(o)" title="Cancelar">
+            <span class="material-icons">cancel</span>
+          </button>
+        </td>
+      </tr>
+      <tr *ngIf="ofertasFiltradas.length === 0">
+        <td colspan="9" class="empty-row">No se encontraron ofertas.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div *ngIf="cargando" class="loading"><span class="material-icons spin">sync</span> Cargando...</div>
+
+<!-- Modal Oferta -->
+<div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+  <div class="modal modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ esNuevo ? "Nueva Oferta" : "Editar Oferta" }}</h2>
+      <button class="btn-icon" (click)="cerrarModal()"><span class="material-icons">close</span></button>
+    </div>
+    <div class="modal-body">
+      <div *ngIf="mensaje && esError" class="alert alert-error mb-16">{{ mensaje }}</div>
+      <div class="form-group full" [class.has-error]="errores['titulo']">
+        <label>Título <span class="req">*</span></label>
+        <input type="text" [(ngModel)]="ofertaEditando.titulo" maxlength="200"
+               placeholder="Ej: Pasantía en Desarrollo Web" (input)="errores['titulo']=''">
+        <span class="error-msg" *ngIf="errores['titulo']">{{ errores['titulo'] }}</span>
+      </div>
+      <div class="form-group full">
+        <label>Descripción</label>
+        <textarea [(ngModel)]="ofertaEditando.descripcion" rows="3" placeholder="Descripción de la oferta..."></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group empresa-group" [class.has-error]="errores['idEmpresa']">
+          <label>Empresa <span class="req">*</span></label>
+          <div class="empresa-select-row">
+            <select [(ngModel)]="ofertaEditando.idEmpresa" (change)="errores['idEmpresa']=''">
+              <option [ngValue]="null">— Seleccione una empresa —</option>
+              <option *ngFor="let e of empresas" [ngValue]="e.idEmpresa">{{ e.razonSocial }}</option>
+            </select>
+            <button class="btn btn-outline-sm" type="button" (click)="abrirModalEmpresa()" title="Registrar nueva empresa">
+              <span class="material-icons">add_business</span>
+            </button>
+          </div>
+          <span class="error-msg" *ngIf="errores['idEmpresa']">{{ errores['idEmpresa'] }}</span>
+        </div>
+        <div class="form-group">
+          <label>Dirección donde se realizará la pasantía</label>
+          <input type="text" [(ngModel)]="ofertaEditando.lugar" maxlength="300">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Modalidad</label>
+          <select [(ngModel)]="ofertaEditando.modalidad">
+            <option *ngFor="let m of modalidades" [value]="m">{{ m }}</option>
+          </select>
+        </div>
+        <div class="form-group form-group-check">
+          <label>¿Es remunerada?</label>
+          <label class="toggle-label">
+            <input type="checkbox" [(ngModel)]="ofertaEditando.remuneracion">
+            <span class="toggle-slider"></span>
+            <span>{{ ofertaEditando.remuneracion ? "Sí" : "No" }}</span>
+          </label>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" [class.has-error]="errores['fechaInicio']">
+          <label>Fecha Inicio <span class="req">*</span></label>
+          <input type="date" [(ngModel)]="ofertaEditando.fechaInicio" (change)="errores['fechaInicio']=''">
+          <span class="error-msg" *ngIf="errores['fechaInicio']">{{ errores['fechaInicio'] }}</span>
+        </div>
+        <div class="form-group" [class.has-error]="errores['fechaFin']">
+          <label>Fecha Fin <span class="req">*</span></label>
+          <input type="date" [(ngModel)]="ofertaEditando.fechaFin" (change)="errores['fechaFin']=''">
+          <span class="error-msg" *ngIf="errores['fechaFin']">{{ errores['fechaFin'] }}</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" [class.has-error]="errores['cupos']">
+          <label>Cupos Disponibles <span class="req">*</span></label>
+          <input type="number" [(ngModel)]="ofertaEditando.cupos" min="1" (input)="errores['cupos']=''">
+          <span class="error-msg" *ngIf="errores['cupos']">{{ errores['cupos'] }}</span>
+        </div>
+        <div class="form-group">
+          <label>Estado</label>
+          <select [(ngModel)]="ofertaEditando.estado">
+            <option value="Abierta">Abierta</option>
+            <option value="Cerrada">Cerrada</option>
+            <option value="Cancelada">Cancelada</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+      <button class="btn btn-primary" (click)="guardarOferta()" [disabled]="guardando">
+        {{ guardando ? "Guardando..." : "Guardar" }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Empresa Rápida -->
+<div class="modal-overlay modal-overlay-top" *ngIf="mostrarModalEmpresa" (click)="cerrarModalEmpresa()">
+  <div class="modal modal-sm" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Registrar Nueva Empresa</h2>
+      <button class="btn-icon" (click)="cerrarModalEmpresa()"><span class="material-icons">close</span></button>
+    </div>
+    <div class="modal-body">
+      <div *ngIf="erroresEmpresa['general']" class="alert alert-error mb-16">{{ erroresEmpresa['general'] }}</div>
+      <div class="form-group" [class.has-error]="erroresEmpresa['ruc']">
+        <label>RUC <span class="req">*</span></label>
+        <input type="text" [(ngModel)]="empresaNueva.ruc" maxlength="13" placeholder="13 dígitos" (input)="erroresEmpresa['ruc']=''">
+        <span class="error-msg" *ngIf="erroresEmpresa['ruc']">{{ erroresEmpresa['ruc'] }}</span>
+      </div>
+      <div class="form-group" [class.has-error]="erroresEmpresa['razonSocial']">
+        <label>Razón Social <span class="req">*</span></label>
+        <input type="text" [(ngModel)]="empresaNueva.razonSocial" maxlength="200" (input)="erroresEmpresa['razonSocial']=''">
+        <span class="error-msg" *ngIf="erroresEmpresa['razonSocial']">{{ erroresEmpresa['razonSocial'] }}</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="cerrarModalEmpresa()">Cancelar</button>
+      <button class="btn btn-primary" (click)="guardarEmpresaRapida()" [disabled]="guardandoEmpresa">
+        {{ guardandoEmpresa ? "Guardando..." : "Registrar Empresa" }}
+      </button>
+    </div>
+  </div>
+</div>

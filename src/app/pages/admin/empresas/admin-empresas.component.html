@@ -1,0 +1,112 @@
+<div class="page-header">
+  <h1>Gestión de Empresas</h1>
+  <p>Administrar empresas y convenios registrados</p>
+</div>
+
+<div *ngIf="mensaje" class="alert" [class.alert-error]="esError" [class.alert-success]="!esError">{{ mensaje }}</div>
+
+<div class="toolbar">
+  <div class="toolbar-left">
+    <input type="text" [(ngModel)]="busqueda" placeholder="Buscar por RUC, razón social, nombre o email..." class="input-search">
+  </div>
+  <div class="toolbar-right">
+    <button class="btn btn-primary" (click)="nuevaEmpresa()"><span class="material-icons">add</span> Nueva Empresa</button>
+  </div>
+</div>
+
+<div class="table-container" *ngIf="!cargando">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>RUC</th>
+        <th>Razón Social</th>
+        <th>Nombre Comercial</th>
+        <th>Sector</th>
+        <th>Teléfono</th>
+        <th>Email</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let e of empresasFiltradas">
+        <td>{{ e.ruc }}</td>
+        <td>{{ e.razonSocial }}</td>
+        <td>{{ e.sectorEconomico || '—' }}</td>
+        <td>{{ e.telefono || '—' }}</td>
+        <td>{{ e.correo || '—' }}</td>
+        <td class="acciones">
+          <button class="btn-icon btn-edit" (click)="editarEmpresa(e)" title="Editar">
+            <span class="material-icons">edit</span>
+          </button>
+          <button class="btn-icon btn-delete" (click)="eliminarEmpresa(e)" title="Desactivar">
+            <span class="material-icons">delete</span>
+          </button>
+        </td>
+      </tr>
+      <tr *ngIf="empresasFiltradas.length === 0">
+        <td colspan="6" class="empty-row">No se encontraron empresas.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div *ngIf="cargando" class="loading"><span class="material-icons spin">sync</span> Cargando...</div>
+
+<!-- Modal Empresa -->
+<div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ esNuevo ? 'Nueva Empresa' : 'Editar Empresa' }}</h2>
+      <button class="btn-icon" (click)="cerrarModal()"><span class="material-icons">close</span></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group" [class.has-error]="errores['ruc']">
+          <label>RUC <span class="req">*</span></label>
+          <input type="text" [(ngModel)]="empresaEditando.ruc" maxlength="13"
+                 placeholder="Ej: 1791234567001" (input)="errores['ruc']=''">
+          <span class="error-msg" *ngIf="errores['ruc']">{{ errores['ruc'] }}</span>
+        </div>
+        <div class="form-group" [class.has-error]="errores['razonSocial']">
+          <label>Razón Social <span class="req">*</span></label>
+          <input type="text" [(ngModel)]="empresaEditando.razonSocial" maxlength="200"
+                 (input)="errores['razonSocial']=''">
+          <span class="error-msg" *ngIf="errores['razonSocial']">{{ errores['razonSocial'] }}</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Sector Económico</label>
+          <select [(ngModel)]="empresaEditando.sectorEconomico">
+            <option value="">— Seleccione un sector —</option>
+            <option *ngFor="let s of sectoresEconomicos" [value]="s">{{ s }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group full">
+        <label>Dirección</label>
+        <input type="text" [(ngModel)]="empresaEditando.direccion" maxlength="300">
+      </div>
+      <div class="form-row">
+        <div class="form-group" [class.has-error]="errores['telefono']">
+          <label>Teléfono</label>
+          <input type="text" [(ngModel)]="empresaEditando.telefono" maxlength="15"
+                 placeholder="Ej: 0999123456" (input)="errores['telefono']=''">
+          <span class="error-msg" *ngIf="errores['telefono']">{{ errores['telefono'] }}</span>
+        </div>
+        <div class="form-group" [class.has-error]="errores['correo']">
+          <label>Correo Electrónico</label>
+          <input type="email" [(ngModel)]="empresaEditando.correo" maxlength="150"
+                 placeholder="Ej: contacto@empresa.com" (input)="errores['correo']=''">
+          <span class="error-msg" *ngIf="errores['correo']">{{ errores['correo'] }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+      <button class="btn btn-primary" (click)="guardarEmpresa()" [disabled]="guardando">
+        {{ guardando ? 'Guardando...' : 'Guardar' }}
+      </button>
+    </div>
+  </div>
+</div>

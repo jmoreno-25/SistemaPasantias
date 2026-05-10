@@ -1,0 +1,208 @@
+<div class="page-header">
+  <h1>Dashboard</h1>
+  <p>Trazabilidad del programa de pasantías</p>
+</div>
+
+<div *ngIf="cargando" class="loading-text">Cargando métricas...</div>
+<div *ngIf="error" class="alert alert-error">{{ error }}</div>
+
+<ng-container *ngIf="datos && !cargando">
+
+  <!-- KPI Cards -->
+  <div class="kpi-grid">
+    <div class="kpi-card kpi-blue">
+      <span class="material-icons">school</span>
+      <div>
+        <div class="kpi-num">{{ datos.kpi.totalInscritos }}</div>
+        <div class="kpi-label">Estudiantes inscritos</div>
+      </div>
+    </div>
+    <div class="kpi-card kpi-green">
+      <span class="material-icons">assignment_turned_in</span>
+      <div>
+        <div class="kpi-num">{{ datos.kpi.totalCompletaron }}</div>
+        <div class="kpi-label">Completaron horas</div>
+      </div>
+    </div>
+    <div class="kpi-card kpi-orange">
+      <span class="material-icons">work</span>
+      <div>
+        <div class="kpi-num">{{ datos.kpi.totalOfertasActivas }}</div>
+        <div class="kpi-label">Ofertas activas</div>
+      </div>
+    </div>
+    <div class="kpi-card kpi-purple">
+      <span class="material-icons">business</span>
+      <div>
+        <div class="kpi-num">{{ datos.kpi.totalEmpresas }}</div>
+        <div class="kpi-label">Empresas registradas</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- Inscritos por semestre -->
+    <div class="card">
+      <h3 class="card-title">Inscritos por semestre</h3>
+      <div *ngFor="let s of datos.inscritosPorSemestre" class="bar-row">
+        <span class="bar-label">{{ s.semestre || 'Sin datos' }}</span>
+        <div class="bar-bg">
+          <div class="bar-fill" [style.width.%]="porcentaje(s.total)"></div>
+        </div>
+        <span class="bar-val">{{ s.total }}</span>
+      </div>
+      <div *ngIf="!datos.inscritosPorSemestre.length" class="empty-text">Sin datos</div>
+    </div>
+
+    <!-- Pasantías por estado -->
+    <div class="card">
+      <h3 class="card-title">Pasantías por estado</h3>
+      <div *ngFor="let e of datos.pasantiasPorEstado" class="estado-row">
+        <span class="estado-label">{{ e.estado }}</span>
+        <span class="estado-num">{{ e.total }}</span>
+      </div>
+      <div *ngIf="!datos.pasantiasPorEstado.length" class="empty-text">Sin datos</div>
+    </div>
+
+  </div>
+
+  <!-- Inscritos por período académico -->
+  <div class="card">
+    <h3 class="card-title">Inscritos por período académico</h3>
+    <div class="empty-text" *ngIf="!datos.inscritosPorPeriodo.length">Sin datos</div>
+    <div *ngFor="let p of datos.inscritosPorPeriodo" class="bar-row">
+      <span class="bar-label">{{ p.nombrePeriodo }}</span>
+      <div class="bar-bg">
+        <div class="bar-fill bar-teal" [style.width.%]="pctPeriodo(p.totalInscritos)"></div>
+      </div>
+      <span class="bar-val">{{ p.totalInscritos }}</span>
+    </div>
+  </div>
+
+  <!-- Empresas con más ofertas -->
+  <div class="card">
+    <h3 class="card-title">Empresas con más ofertas</h3>
+    <div class="empty-text" *ngIf="!datos.empresasConMasOfertas.length">Sin datos</div>
+    <div *ngFor="let e of datos.empresasConMasOfertas" class="bar-row">
+      <span class="bar-label bar-label-lg">{{ e.nombreEmpresa }}</span>
+      <div class="bar-bg">
+        <div class="bar-fill bar-purple" [style.width.%]="pctEmpresa(e.totalOfertas)">
+          <span class="bar-inner-label" *ngIf="pctEmpresa(e.totalOfertas) > 25">{{ e.ofertasActivas }} activas</span>
+        </div>
+      </div>
+      <span class="bar-val">{{ e.totalOfertas }}</span>
+    </div>
+  </div>
+
+  <!-- Actividades recientes -->
+  <div class="card">
+    <h3 class="card-title">Últimas actividades registradas</h3>
+    <div class="empty-text" *ngIf="!datos.actividadesRecientes.length">Sin actividades recientes</div>
+    <div class="act-table-wrap" *ngIf="datos.actividadesRecientes.length">
+      <table class="act-tabla">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Estudiante</th>
+            <th>Empresa</th>
+            <th class="th-horas">Horas</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let a of datos.actividadesRecientes" (click)="verDetalle(a)" class="tr-clickable">
+            <td class="td-fecha">{{ a.fecha | date:'dd/MM/yyyy' }}</td>
+            <td class="td-nombre">{{ a.nombreEstudiante }}</td>
+            <td class="td-empresa">{{ a.nombreEmpresa }}</td>
+            <td class="td-horas"><span class="badge-h">{{ a.horasRegistradas }}h</span></td>
+            <td class="td-desc">{{ a.descripcion }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</ng-container>
+
+<!-- Panel Detalle Pasantía -->
+<div class="detalle-overlay" *ngIf="mostrarDetalle" (click)="cerrarDetalle()">
+  <div class="detalle-panel" (click)="$event.stopPropagation()">
+
+    <div class="detalle-header">
+      <h2><span class="material-icons">school</span> Detalle de Pasantía</h2>
+      <button class="btn-icon" (click)="cerrarDetalle()"><span class="material-icons">close</span></button>
+    </div>
+
+    <div *ngIf="detalleCargando" class="loading">
+      <span class="material-icons spin">sync</span> Cargando...
+    </div>
+
+    <div *ngIf="detalle && !detalleCargando" class="detalle-body">
+
+      <!-- Gráfico de avance -->
+      <div class="avance-section">
+        <svg viewBox="0 0 120 120" class="pie-chart">
+          <circle cx="60" cy="60" r="54" fill="none" stroke="#e0e0e0" stroke-width="12"/>
+          <circle cx="60" cy="60" r="54" fill="none"
+                  [attr.stroke]="porcentajeAvance >= 100 ? '#2e7d32' : '#1976d2'"
+                  stroke-width="12"
+                  stroke-linecap="round"
+                  [attr.stroke-dasharray]="arcCompletado"
+                  [attr.stroke-dashoffset]="strokeOffset"
+                  style="transform-origin:center;transform:rotate(-90deg)"/>
+          <text x="60" y="56" text-anchor="middle" class="pie-pct">{{ porcentajeAvance }}%</text>
+          <text x="60" y="72" text-anchor="middle" class="pie-label">Avance</text>
+        </svg>
+        <div class="avance-meta">
+          <p><strong>{{ detalle.horasCompletadas }}</strong> / {{ detalle.horasRequeridas }} horas completadas</p>
+          <span class="det-badge" [ngClass]="getBadgeClass(detalle.estadoPasantia || '')">{{ detalle.estadoPasantia }}</span>
+        </div>
+      </div>
+
+      <!-- Información -->
+      <div class="detalle-grid">
+        <div class="detalle-card">
+          <h3><span class="material-icons">person</span> Estudiante</h3>
+          <p><b>Nombre:</b> {{ detalle.nombreEstudiante }}</p>
+        </div>
+        <div class="detalle-card">
+          <h3><span class="material-icons">business</span> Empresa</h3>
+          <p><b>Razón Social:</b> {{ detalle.nombreEmpresa || '—' }}</p>
+          <h3 style="margin-top:12px"><span class="material-icons">badge</span> Tutor</h3>
+          <p><b>Nombre:</b> {{ detalle.nombreTutor || '—' }}</p>
+        </div>
+        <div class="detalle-card">
+          <h3><span class="material-icons">calendar_today</span> Cronograma</h3>
+          <p><b>Cargo:</b> {{ detalle.cargoPasantia || '—' }}</p>
+          <p><b>Fecha inicio:</b> {{ detalle.fechaInicio | date:'dd/MM/yyyy' }}</p>
+        </div>
+      </div>
+
+      <!-- Actividades -->
+      <div class="actividades-section">
+        <h3><span class="material-icons">edit_note</span> Actividades registradas</h3>
+        <div *ngIf="actividadesCargando" class="loading-small">
+          <span class="material-icons spin">sync</span> Cargando...
+        </div>
+        <table *ngIf="!actividadesCargando" class="act-table">
+          <thead>
+            <tr><th>Fecha</th><th>Título</th><th>Descripción</th><th>Horas</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let a of actividades">
+              <td>{{ a.fecha | date:'dd/MM/yyyy' }}</td>
+              <td><strong>{{ a.titulo }}</strong></td>
+              <td class="td-desc">{{ a.descripcion || '—' }}</td>
+              <td><span class="badge-horas">{{ a.horas }}h</span></td>
+            </tr>
+            <tr *ngIf="actividades.length === 0">
+              <td colspan="4" class="empty-act">Sin actividades registradas.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div><!-- /detalle-body -->
+  </div>
+</div>

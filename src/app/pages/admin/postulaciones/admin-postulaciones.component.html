@@ -1,0 +1,69 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1><span class="material-icons">send</span> Postulaciones</h1>
+    <span class="total-badge">{{ filtradas.length }} registros</span>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros-bar">
+    <div class="search-box">
+      <span class="material-icons">search</span>
+      <input type="text" placeholder="Buscar estudiante, oferta o empresa..."
+             [(ngModel)]="filtroBusqueda" (input)="aplicarFiltros()" />
+    </div>
+    <select [(ngModel)]="filtroEstado" (change)="aplicarFiltros()" class="select-estado">
+      <option value="">Todos los estados</option>
+      <option *ngFor="let e of estados" [value]="e">{{ e }}</option>
+    </select>
+  </div>
+
+  <!-- Cargando -->
+  <div class="estado-info" *ngIf="cargando">
+    <span class="material-icons spin">sync</span> Cargando...
+  </div>
+  <div class="estado-info error" *ngIf="error">
+    <span class="material-icons">error</span> {{ error }}
+  </div>
+  <div class="estado-info" *ngIf="!cargando && !error && filtradas.length === 0">
+    <span class="material-icons">inbox</span> No hay postulaciones.
+  </div>
+
+  <!-- Tabla -->
+  <div class="tabla-wrapper" *ngIf="!cargando && filtradas.length > 0">
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Estudiante</th>
+          <th>Oferta</th>
+          <th>Empresa</th>
+          <th>Fecha</th>
+          <th>CV</th>
+          <th>Estado</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of filtradas">
+          <td>{{ p.idPostulacion }}</td>
+          <td>{{ p.nombreEstudiante || '—' }}</td>
+          <td>{{ p.tituloOferta || '—' }}</td>
+          <td>{{ p.nombreEmpresa || '—' }}</td>
+          <td>{{ p.fecha ? (p.fecha | date:'dd/MM/yyyy') : '—' }}</td>
+          <td>
+            <a *ngIf="p.cvUrl" [href]="p.cvUrl" target="_blank" class="cv-link">
+              <span class="material-icons">picture_as_pdf</span> Ver CV
+            </a>
+            <span *ngIf="!p.cvUrl" class="cv-sin">—</span>
+          </td>
+          <td><span class="badge" [ngClass]="getBadgeClass(p.estado)">{{ p.estado }}</span></td>
+          <td>
+            <select class="select-accion" [value]="p.estado" (change)="cambiarEstado(p, $any($event.target).value)">
+              <option *ngFor="let e of estados" [value]="e">{{ e }}</option>
+            </select>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

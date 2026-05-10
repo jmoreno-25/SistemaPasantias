@@ -1,0 +1,7 @@
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.page-header h2 { margin: 0; font-size: 1.4rem; color: #1e293b; }
+.badge { padding: 0.25rem 0.6rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+.badge-activo { background: #dcfce7; color: #166534; }
+.badge-cerrado { background: #f1f5f9; color: #64748b; }
+.acciones { display: flex; gap: 0.5rem; }
+.empty-text { text-align: center; color: #94a3b8; padding: 2rem; }

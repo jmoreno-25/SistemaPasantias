@@ -1,0 +1,199 @@
+﻿<div class="page-header">
+  <h1>Pasantías</h1>
+  <p>Seguimiento de todas las pasantías activas y finalizadas</p>
+</div>
+
+<div *ngIf="mensaje" class="alert" [class.alert-error]="esError" [class.alert-success]="!esError">{{ mensaje }}</div>
+
+<div class="toolbar">
+  <div class="toolbar-left">
+    <input type="text" [(ngModel)]="busqueda" placeholder="Buscar por estudiante, empresa o estado..." class="input-search">
+    <select [(ngModel)]="filtroEstado" class="select-filtro">
+      <option value="">Todos los estados</option>
+      <option value="En Curso">En Curso</option>
+      <option value="Finalizada">Finalizada</option>
+      <option value="Cancelada">Cancelada</option>
+    </select>
+  </div>
+  <div class="toolbar-right">
+    <button class="btn btn-primary" (click)="nuevaPasantia()"><span class="material-icons">add</span> Nueva Pasantía</button>
+  </div>
+</div>
+
+<div class="table-container" *ngIf="!cargando">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Estudiante</th>
+        <th>Empresa</th>
+        <th>Fecha Inicio</th>
+        <th>Fecha Fin</th>
+        <th>Horas Req.</th>
+        <th>Avance</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let p of pasantiasFiltradas">
+        <td class="td-estudiante">{{ p.nombreEstudiante }}</td>
+        <td>{{ p.nombreEmpresa }}</td>
+        <td>{{ p.fechaInicio | date:'dd/MM/yyyy' }}</td>
+        <td>{{ p.fechaFin ? (p.fechaFin | date:'dd/MM/yyyy') : '—' }}</td>
+        <td>{{ p.horasRequeridas }}h</td>
+        <td>
+          <div class="avance-bar-wrap">
+            <div class="avance-bar">
+              <div class="avance-fill" [style.width.%]="p.horasRequeridas > 0 ? (p.horasCompletadas / p.horasRequeridas * 100) : 0"></div>
+            </div>
+            <span class="avance-pct">{{ p.horasRequeridas > 0 ? (p.horasCompletadas / p.horasRequeridas * 100 | number:'1.0-0') : 0 }}%</span>
+          </div>
+        </td>
+        <td><span class="badge" [ngClass]="getEstadoClass(p.estadoPasantia || '')">{{ p.estadoPasantia }}</span></td>
+        <td class="acciones">
+          <button class="btn-icon btn-view" (click)="verDetalle(p)" title="Ver detalle">
+            <span class="material-icons">visibility</span>
+          </button>
+          <button class="btn-icon btn-edit" (click)="editarPasantia(p)" title="Editar">
+            <span class="material-icons">edit</span>
+          </button>
+          <button class="btn-icon btn-delete" (click)="eliminarPasantia(p)" title="Cancelar">
+            <span class="material-icons">cancel</span>
+          </button>
+        </td>
+      </tr>
+      <tr *ngIf="pasantiasFiltradas.length === 0">
+        <td colspan="8" class="empty-row">No se encontraron pasantías.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div *ngIf="cargando" class="loading"><span class="material-icons spin">sync</span> Cargando...</div>
+
+<!-- â•â•â• Panel Detalle Pasantía â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<div class="detalle-overlay" *ngIf="mostrarDetalle" (click)="cerrarDetalle()">
+  <div class="detalle-panel" (click)="$event.stopPropagation()">
+
+    <div class="detalle-header">
+      <h2><span class="material-icons">school</span> Detalle de Pasantía</h2>
+      <button class="btn-icon" (click)="cerrarDetalle()"><span class="material-icons">close</span></button>
+    </div>
+
+    <div *ngIf="detalleCargando" class="loading"><span class="material-icons spin">sync</span> Cargando...</div>
+
+    <div *ngIf="detalle && !detalleCargando" class="detalle-body">
+
+      <!-- Grafico de avance (pie SVG puro) -->
+      <div class="avance-section">
+        <svg viewBox="0 0 120 120" class="pie-chart">
+          <!-- fondo -->
+          <circle cx="60" cy="60" r="54" fill="none" stroke="#e0e0e0" stroke-width="12"/>
+          <!-- completado -->
+          <circle cx="60" cy="60" r="54" fill="none"
+                  [attr.stroke]="porcentajeAvance >= 100 ? '#2e7d32' : '#1976d2'"
+                  stroke-width="12"
+                  stroke-linecap="round"
+                  [attr.stroke-dasharray]="arcCompletado"
+                  [attr.stroke-dashoffset]="strokeOffset"
+                  style="transform-origin:center;transform:rotate(-90deg)"/>
+          <text x="60" y="56" text-anchor="middle" class="pie-pct">{{ porcentajeAvance }}%</text>
+          <text x="60" y="72" text-anchor="middle" class="pie-label">Avance</text>
+        </svg>
+        <div class="avance-meta">
+          <p><strong>{{ detalle.horasCompletadas }}</strong> / {{ detalle.horasRequeridas }} horas completadas</p>
+          <span class="badge" [ngClass]="getEstadoClass(detalle.estadoPasantia || '')">{{ detalle.estadoPasantia }}</span>
+        </div>
+      </div>
+
+      <!-- Informacion -->
+      <div class="detalle-grid">
+        <div class="detalle-card">
+          <h3><span class="material-icons">person</span> Estudiante</h3>
+          <p><b>Nombre:</b> {{ detalle.nombreEstudiante }}</p>
+        </div>
+        <div class="detalle-card">
+          <h3><span class="material-icons">business</span> Empresa</h3>
+          <p><b>Razon Social:</b> {{ detalle.nombreEmpresa || '—' }}</p>
+          <h3 style="margin-top:12px"><span class="material-icons">badge</span> Tutor</h3>
+          <p><b>Nombre:</b> {{ detalle.nombreTutor || '—' }}</p>
+        </div>
+        <div class="detalle-card">
+          <h3><span class="material-icons">calendar_today</span> Cronograma</h3>
+          <p><b>Cargo:</b> {{ detalle.cargoPasantia || '—' }}</p>
+          <p><b>Fecha inicio:</b> {{ detalle.fechaInicio | date:'dd/MM/yyyy' }}</p>
+        </div>
+      </div>
+
+      <!-- Actividades -->
+      <div class="actividades-section">
+        <h3><span class="material-icons">edit_note</span> Actividades registradas</h3>
+        <div *ngIf="actividadesCargando" class="loading-small"><span class="material-icons spin">sync</span> Cargando...</div>
+        <table *ngIf="!actividadesCargando" class="act-table">
+          <thead>
+            <tr><th>Fecha</th><th>Título</th><th>Descripción</th><th>Horas</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let a of actividades">
+              <td>{{ a.fecha | date:'dd/MM/yyyy' }}</td>
+              <td><strong>{{ a.titulo }}</strong></td>
+              <td class="td-desc">{{ a.descripcion || '—' }}</td>
+              <td><span class="badge-horas">{{ a.horas }}h</span></td>
+            </tr>
+            <tr *ngIf="actividades.length === 0">
+              <td colspan="4" class="empty-act">Sin actividades registradas.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div><!-- /detalle-body -->
+  </div>
+</div>
+
+<!-- â•â•â• Modal Edición Pasantía â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ esNuevo ? 'Nueva Pasantía' : 'Editar Pasantía' }}</h2>
+      <button class="btn-icon" (click)="cerrarModal()"><span class="material-icons">close</span></button>
+    </div>
+    <div class="modal-body">
+      <div *ngIf="mensaje && esError" class="alert alert-error" style="margin-bottom:16px">{{ mensaje }}</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Cargo</label>
+          <input type="text" [(ngModel)]="pasantiaEditando.cargoPasantia" maxlength="50">
+        </div>
+        <div class="form-group">
+          <label>Estado</label>
+          <select [(ngModel)]="pasantiaEditando.estadoPasantia">
+            <option value="En curso">En curso</option>
+            <option value="Finalizada">Finalizada</option>
+            <option value="Cancelada">Cancelada</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Fecha Inicio</label>
+          <input type="date" [(ngModel)]="pasantiaEditando.fechaInicio">
+        </div>
+        <div class="form-group">
+          <label>Fecha Fin</label>
+          <input type="date" [(ngModel)]="pasantiaEditando.fechaFin">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Horas Requeridas</label>
+          <input type="number" [(ngModel)]="pasantiaEditando.horasRequeridas" min="1">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+      <button class="btn btn-primary" (click)="guardarPasantia()" [disabled]="guardando">
+        {{ guardando ? 'Guardando...' : 'Guardar' }}
+      </button>
+    </div>

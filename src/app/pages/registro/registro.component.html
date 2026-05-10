@@ -1,0 +1,142 @@
+<div class="registro-container">
+  <div class="registro-card">
+    <h2>Sistema de Pasantías</h2>
+    <p class="subtitle">Crear Cuenta</p>
+
+    <div *ngIf="mensaje" class="alert" [class.alert-error]="esError" [class.alert-success]="!esError">
+      {{ mensaje }}
+    </div>
+
+    <form (ngSubmit)="registrar()">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="cedula">Cédula *</label>
+          <input type="text" id="cedula" [(ngModel)]="modelo.cedula" name="cedula"
+                 placeholder="1750123456" required />
+        </div>
+        <div class="form-group">
+          <label for="idRol">Rol *</label>
+          <select id="idRol" [(ngModel)]="selectedRol" name="idRol" (ngModelChange)="onRolChange()" required>
+            <option [ngValue]="null" disabled>Seleccione un rol</option>
+            <option *ngFor="let rol of roles" [ngValue]="rol.idRol">{{ rol.nombre }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="nombres">Nombres *</label>
+          <input type="text" id="nombres" [(ngModel)]="modelo.nombres" name="nombres"
+                 placeholder="Carlos Andrés" required />
+        </div>
+        <div class="form-group">
+          <label for="apellidos">Apellidos *</label>
+          <input type="text" id="apellidos" [(ngModel)]="modelo.apellidos" name="apellidos"
+                 placeholder="Mendoza Rivera" required />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Correo Electrónico *</label>
+        <input type="email" id="email" [(ngModel)]="modelo.email" name="email"
+               placeholder="correo@ejemplo.com" required />
+      </div>
+
+      <div class="form-group">
+        <label for="telefono">Teléfono</label>
+        <input type="text" id="telefono" [(ngModel)]="modelo.telefono" name="telefono"
+               placeholder="0991234567" />
+      </div>
+
+      <!-- ========== CAMPOS ESTUDIANTE ========== -->
+      <ng-container *ngIf="rolSeleccionadoNombre === 'Estudiante'">
+        <div class="section-label">Información Académica</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="facultad">Facultad *</label>
+            <select id="facultad" [(ngModel)]="modelo.idFacultad" name="idFacultad" (ngModelChange)="onFacultadChange()">
+              <option [ngValue]="undefined" disabled>Seleccione facultad</option>
+              <option *ngFor="let f of facultades" [ngValue]="f.idFacultad">{{ f.nombre }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="carrera">Carrera *</label>
+            <select id="carrera" [(ngModel)]="modelo.idCarrera" name="idCarrera" [disabled]="!modelo.idFacultad">
+              <option [ngValue]="undefined" disabled>Seleccione carrera</option>
+              <option *ngFor="let c of carreras" [ngValue]="c.idCarrera">{{ c.nombre }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="semestre">Semestre *</label>
+          <select id="semestre" [(ngModel)]="modelo.semestre" name="semestre">
+            <option [ngValue]="undefined" disabled>Seleccione semestre</option>
+            <option *ngFor="let s of [1,2,3,4,5,6,7,8,9,10]" [value]="s + '° Semestre'">{{ s }}° Semestre</option>
+          </select>
+        </div>
+      </ng-container>
+
+      <!-- ========== CAMPOS DOCENTE ========== -->
+      <ng-container *ngIf="rolSeleccionadoNombre === 'Docente'">
+        <div class="section-label">Información Académica</div>
+        <div class="form-group">
+          <label for="titulo">Título Académico</label>
+          <input type="text" id="titulo" [(ngModel)]="modelo.tituloAcademico" name="tituloAcademico"
+                 placeholder="Ej: Magíster en Ingeniería de Software" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="facultadDocente">Facultad</label>
+            <select id="facultadDocente" [(ngModel)]="modelo.idFacultad" name="idFacultadDocente">
+              <option [ngValue]="undefined" disabled>Seleccione facultad</option>
+              <option *ngFor="let f of facultades" [ngValue]="f.idFacultad">{{ f.nombre }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="especialidad">Especialidad</label>
+            <input type="text" id="especialidad" [(ngModel)]="modelo.especialidad" name="especialidad"
+                   placeholder="Ej: Desarrollo de Software" />
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ========== CAMPOS TUTOR EMPRESARIAL ========== -->
+      <ng-container *ngIf="rolSeleccionadoNombre === 'Tutor'">
+        <div class="section-label">Información Empresarial</div>
+        <div class="form-group">
+          <label for="empresa">Empresa *</label>
+          <select id="empresa" [(ngModel)]="modelo.idEmpresa" name="idEmpresa">
+            <option [ngValue]="undefined" disabled>Seleccione empresa</option>
+            <option *ngFor="let e of empresas" [ngValue]="e.idEmpresa">{{ e.razonSocial }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="cargo">Cargo</label>
+          <input type="text" id="cargo" [(ngModel)]="modelo.cargo" name="cargo"
+                 placeholder="Ej: Jefe de Recursos Humanos" />
+        </div>
+      </ng-container>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="contrasena">Contraseña *</label>
+          <input type="password" id="contrasena" [(ngModel)]="modelo.contrasena" name="contrasena"
+                 placeholder="Mínimo 6 caracteres" required />
+        </div>
+        <div class="form-group">
+          <label for="confirmar">Confirmar Contraseña *</label>
+          <input type="password" id="confirmar" [(ngModel)]="confirmarContrasena" name="confirmar"
+                 placeholder="Repita la contraseña" required />
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" [disabled]="cargando">
+        {{ cargando ? 'Registrando...' : 'Crear Cuenta' }}
+      </button>
+    </form>
+
+    <p class="link-login">
+      ¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a>
+    </p>
+  </div>
+</div>

@@ -1,0 +1,116 @@
+<div class="perfil-page" *ngIf="usuario">
+
+  <!-- Hero header -->
+  <div class="perfil-hero">
+    <div class="avatar-grande">{{ iniciales }}</div>
+    <div class="hero-info">
+      <h1>{{ usuario.nombres }} {{ usuario.apellidos }}</h1>
+      <span class="rol-badge">{{ rolActual }}</span>
+      <p class="hero-email"><span class="material-icons">email</span> {{ usuario.email }}</p>
+    </div>
+  </div>
+
+  <!-- Información personal -->
+  <section class="seccion-card">
+    <h2><span class="material-icons">person</span> Información Personal</h2>
+    <div class="info-grid">
+      <div class="info-item">
+        <span class="info-label">Cédula</span>
+        <span class="info-valor">{{ usuario.cedula }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Teléfono</span>
+        <span class="info-valor">{{ usuario.telefono || 'No registrado' }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Fecha de registro</span>
+        <span class="info-valor">{{ usuario.fechaRegistro | date:'dd/MM/yyyy' }}</span>
+      </div>
+      <div class="info-item" *ngIf="esEstudiante && estudiante">
+        <span class="info-label">Carrera</span>
+        <span class="info-valor">{{ estudiante.nombreCarrera || '—' }}</span>
+      </div>
+      <div class="info-item" *ngIf="esEstudiante && estudiante">
+        <span class="info-label">Facultad</span>
+        <span class="info-valor">{{ estudiante.nombreFacultad || '—' }}</span>
+      </div>
+      <div class="info-item" *ngIf="esEstudiante && estudiante">
+        <span class="info-label">Semestre</span>
+        <span class="info-valor">{{ estudiante.semestre || '—' }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sección CV (solo estudiantes) -->
+  <section class="seccion-card" *ngIf="esEstudiante">
+    <h2><span class="material-icons">description</span> Curriculum Vitae</h2>
+
+    <!-- CV actual -->
+    <div class="cv-actual" *ngIf="estudiante?.cvUrl; else sinCv">
+      <div class="cv-preview">
+        <span class="material-icons cv-icon">picture_as_pdf</span>
+        <div>
+          <p class="cv-label">CV subido</p>
+          <a [href]="estudiante!.cvUrl" target="_blank" class="cv-link">
+            <span class="material-icons">open_in_new</span> Ver CV
+          </a>
+        </div>
+      </div>
+    </div>
+    <ng-template #sinCv>
+      <div class="cv-vacio">
+        <span class="material-icons">upload_file</span>
+        <p>Aún no has subido tu CV</p>
+      </div>
+    </ng-template>
+
+    <!-- Upload -->
+    <div class="cv-upload-area">
+      <label class="upload-label" [class.archivo-seleccionado]="cvArchivo">
+        <span class="material-icons">attach_file</span>
+        <span>{{ cvArchivo ? cvArchivo.name : 'Seleccionar archivo (PDF, DOC, DOCX)' }}</span>
+        <input type="file" accept=".pdf,.doc,.docx" (change)="onCvSeleccionado($event)" hidden>
+      </label>
+      <button class="btn-subir" [disabled]="!cvArchivo || subiendoCv" (click)="subirCv()">
+        <span class="material-icons">{{ subiendoCv ? 'sync' : 'cloud_upload' }}</span>
+        {{ subiendoCv ? 'Subiendo...' : (estudiante?.cvUrl ? 'Actualizar CV' : 'Subir CV') }}
+      </button>
+    </div>
+
+    <div *ngIf="mensajeCv" class="alert-cv"
+         [class.alert-cv-error]="esErrorCv" [class.alert-cv-ok]="!esErrorCv">
+      <span class="material-icons">{{ esErrorCv ? 'error' : 'check_circle' }}</span>
+      {{ mensajeCv }}
+    </div>
+  </section>
+
+  <!-- Cambiar contraseña -->
+  <section class="seccion-card">
+    <h2><span class="material-icons">lock</span> Cambiar Contraseña</h2>
+
+    <div *ngIf="mensajeContrasena" class="alert-cv"
+         [class.alert-cv-error]="esErrorContrasena" [class.alert-cv-ok]="!esErrorContrasena">
+      <span class="material-icons">{{ esErrorContrasena ? 'error' : 'check_circle' }}</span>
+      {{ mensajeContrasena }}
+    </div>
+
+    <form (ngSubmit)="cambiarContrasena()" class="form-pass">
+      <div class="form-group">
+        <label>Contraseña actual</label>
+        <input type="password" [(ngModel)]="contrasenaActual" name="contrasenaActual" placeholder="••••••••" required />
+      </div>
+      <div class="form-group">
+        <label>Nueva contraseña</label>
+        <input type="password" [(ngModel)]="nuevaContrasena" name="nuevaContrasena" placeholder="••••••••" required />
+      </div>
+      <div class="form-group">
+        <label>Confirmar nueva contraseña</label>
+        <input type="password" [(ngModel)]="confirmarNueva" name="confirmarNueva" placeholder="••••••••" required />
+      </div>
+      <button type="submit" class="btn-guardar">
+        <span class="material-icons">save</span> Guardar contraseña
+      </button>
+    </form>
+  </section>
+
+</div>

@@ -1,0 +1,72 @@
+.page-header { margin-bottom: 24px; }
+.page-header h1 { font-size: 1.6rem; color: #1a3050; margin: 0; }
+.page-header p { color: #666; margin: 4px 0 0; }
+.alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 0.9rem; }
+.alert-success { background: #e8f5e9; color: #2e7d32; }
+.alert-error { background: #ffebee; color: #c62828; }
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 12px; flex-wrap: wrap; }
+.toolbar-left { display: flex; gap: 12px; flex: 1; }
+.toolbar-right { display: flex; gap: 12px; align-items: center; }
+.input-search { padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; width: 100%; max-width: 320px; outline: none; transition: border-color 0.2s; }
+.input-search:focus { border-color: #4fc3f7; }
+.select-filtro { padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; background: #fff; outline: none; cursor: pointer; }
+.table-container { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow-x: auto; }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th { background: #f8f9fa; padding: 14px 16px; text-align: left; font-size: 0.82rem; color: #666; font-weight: 600; text-transform: uppercase; border-bottom: 2px solid #eee; }
+.data-table td { padding: 14px 16px; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; color: #333; }
+.data-table tbody tr:hover { background: #f8fbff; }
+.empty-row { text-align: center; color: #999; padding: 32px 16px !important; }
+.badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 0.78rem; font-weight: 600; }
+.badge-success { background: #e8f5e9; color: #2e7d32; }
+.badge-warning { background: #fff3e0; color: #e65100; }
+.badge-danger { background: #ffebee; color: #c62828; }
+.acciones { display: flex; gap: 6px; }
+.btn-icon { background: none; border: none; cursor: pointer; padding: 6px; border-radius: 6px; display: flex; align-items: center; transition: all 0.2s; }
+.btn-icon .material-icons { font-size: 20px; }
+.btn-edit { color: #1976d2; } .btn-edit:hover { background: #e3f2fd; }
+.btn-delete { color: #c62828; } .btn-delete:hover { background: #ffebee; }
+.btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary { background: #1a3050; color: #fff; } .btn-primary:hover { background: #254670; } .btn-primary:disabled { background: #999; cursor: not-allowed; }
+.btn-secondary { background: #e0e0e0; color: #333; } .btn-secondary:hover { background: #d0d0d0; }
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.modal { background: #fff; border-radius: 12px; width: 90%; max-width: 600px; max-height: 85vh; overflow-y: auto; box-shadow: 0 12px 40px rgba(0,0,0,0.2); }
+.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid #eee; }
+.modal-header h2 { margin: 0; font-size: 1.2rem; color: #1a3050; }
+.modal-body { padding: 24px; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 12px; padding: 16px 24px; border-top: 1px solid #eee; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.form-group { display: flex; flex-direction: column; margin-bottom: 16px; }
+.form-group.full { grid-column: 1 / -1; width: 100%; }
+.form-group label { font-size: 0.82rem; font-weight: 600; color: #555; margin-bottom: 6px; }
+.form-group input, .form-group select, .form-group textarea { padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; outline: none; transition: border-color 0.2s; font-family: inherit; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #4fc3f7; }
+.form-group textarea { resize: vertical; min-height: 80px; }
+.loading { text-align: center; padding: 48px; color: #888; display: flex; align-items: center; justify-content: center; gap: 8px; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.spin { animation: spin 1s linear infinite; }
+/* Estilos nuevos */
+.modal-lg { max-width: 700px; }
+.modal-sm { max-width: 420px; }
+.modal-overlay-top { z-index: 1100; }
+.mb-16 { margin-bottom: 16px; }
+.error-msg { font-size: 0.78rem; color: #c62828; margin-top: 4px; }
+.req { color: #e53935; margin-left: 2px; }
+.form-group.has-error input, .form-group.has-error select { border-color: #e53935; background: #fff8f8; }
+.empresa-select-row { display: flex; gap: 8px; align-items: stretch; }
+.empresa-select-row select { flex: 1; }
+.btn-outline-sm { padding: 8px 10px; border: 1.5px solid #1a3050; border-radius: 8px; background: #fff; color: #1a3050; cursor: pointer; display: flex; align-items: center; transition: all 0.2s; }
+.btn-outline-sm:hover { background: #1a3050; color: #fff; }
+.btn-outline-sm .material-icons { font-size: 20px; }
+.badge-modalidad { font-size: 0.78rem; padding: 3px 8px; border-radius: 12px; background: #e3f2fd; color: #1565c0; font-weight: 600; }
+.remunerada-icon { font-size: 20px; vertical-align: middle; }
+.remunerada-si { color: #2e7d32; }
+.remunerada-no { color: #bbb; }
+.form-group-check { justify-content: flex-start; }
+.form-group-check label:first-child { font-size: 0.82rem; font-weight: 600; color: #555; margin-bottom: 8px; }
+.toggle-label { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.9rem; }
+.toggle-label input[type=checkbox] { display: none; }
+.toggle-slider { width: 44px; height: 24px; background: #ccc; border-radius: 12px; position: relative; transition: background 0.2s; flex-shrink: 0; }
+.toggle-slider::after { content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; background: #fff; border-radius: 50%; transition: transform 0.2s; }
+.toggle-label input:checked ~ .toggle-slider { background: #2e7d32; }
+.toggle-label input:checked ~ .toggle-slider::after { transform: translateX(20px); }
+.spin { animation: spin 1s linear infinite; }

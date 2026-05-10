@@ -1,0 +1,46 @@
+<div class="app-layout">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-logo">
+      <div class="logo-circle">
+        <span class="material-icons">school</span>
+      </div>
+      <div class="logo-text">
+        <span class="university-name">Sistema de</span>
+        <span class="university-name">Pasantias</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="content-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <a *ngFor="let item of menuItems"
+           [routerLink]="item.ruta"
+           routerLinkActive="active">
+          <span class="material-icons">{{ item.icon }}</span>
+          <span class="nav-label">{{ item.label }}</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a class="user-perfil-link" routerLink="/perfil" title="Ver perfil">
+          <div class="user-avatar">{{ getInitials() }}</div>
+          <div class="user-info" *ngIf="usuario">
+            <div class="user-name">{{ usuario.nombres }} {{ usuario.apellidos }}</div>
+            <div class="user-role">{{ getRolLabel() }}</div>
+          </div>
+        </a>
+        <button class="btn-logout" (click)="logout()" title="Cerrar sesion">
+          <span class="material-icons">logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

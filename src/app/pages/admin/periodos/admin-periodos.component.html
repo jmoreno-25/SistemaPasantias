@@ -1,0 +1,112 @@
+<div class="page-header">
+  <h2>Períodos Académicos</h2>
+  <button class="btn-primary" (click)="abrirNuevo()">
+    <span class="material-icons">add</span> Nuevo Período
+  </button>
+</div>
+
+<div class="alert alert-error" *ngIf="error && !mostrarModal">{{ error }}</div>
+<div class="alert alert-success" *ngIf="exito">{{ exito }}</div>
+
+<div class="card">
+  <div *ngIf="cargando" class="loading-text">Cargando períodos...</div>
+
+  <table class="tabla" *ngIf="!cargando">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Año</th>
+        <th>Período</th>
+        <th>Inicio</th>
+        <th>Fin</th>
+        <th>Estado</th>
+        <th>Pasantías</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let p of periodos">
+        <td><strong>{{ p.nombre }}</strong></td>
+        <td>{{ p.anio }}</td>
+        <td>{{ p.numeroPeriodo === 1 ? 'I' : 'II' }}</td>
+        <td>{{ p.fechaInicio | date:'dd/MM/yyyy' }}</td>
+        <td>{{ p.fechaFin | date:'dd/MM/yyyy' }}</td>
+        <td>
+          <span class="badge" [ngClass]="p.estado === 'Activo' ? 'badge-activo' : 'badge-cerrado'">
+            {{ p.estado }}
+          </span>
+        </td>
+        <td>{{ p.totalPasantias ?? 0 }}</td>
+        <td class="acciones">
+          <button class="btn-icon" title="Editar" (click)="abrirEditar(p)">
+            <span class="material-icons">edit</span>
+          </button>
+          <button class="btn-icon btn-danger" title="Cerrar" (click)="cerrar(p)" *ngIf="p.estado !== 'Cerrado'">
+            <span class="material-icons">lock</span>
+          </button>
+        </td>
+      </tr>
+      <tr *ngIf="periodos.length === 0">
+        <td colspan="8" class="empty-text">No hay períodos registrados.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ editando ? 'Editar Período' : 'Nuevo Período' }}</h3>
+      <button class="btn-close" (click)="cerrarModal()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Año *</label>
+          <input type="number" [(ngModel)]="form.anio" (change)="actualizarNombre()" min="2020" max="2100" />
+        </div>
+        <div class="form-group">
+          <label>Período *</label>
+          <select [(ngModel)]="form.numeroPeriodo" (change)="actualizarNombre()">
+            <option [value]="1">I (Primer período)</option>
+            <option [value]="2">II (Segundo período)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Nombre (auto-generado)</label>
+        <input type="text" [(ngModel)]="form.nombre" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Fecha Inicio *</label>
+          <input type="date" [(ngModel)]="form.fechaInicio" />
+        </div>
+        <div class="form-group">
+          <label>Fecha Fin *</label>
+          <input type="date" [(ngModel)]="form.fechaFin" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Estado</label>
+        <select [(ngModel)]="form.estado">
+          <option value="Activo">Activo</option>
+          <option value="Cerrado">Cerrado</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+      <button class="btn-primary" (click)="guardar()" [disabled]="guardando">
+        {{ guardando ? 'Guardando...' : (editando ? 'Actualizar' : 'Crear') }}
+      </button>
+    </div>
+  </div>
+</div>

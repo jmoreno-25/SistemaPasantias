@@ -1,0 +1,102 @@
+<div class="page-header">
+  <h1>Evaluaciones</h1>
+  <p>Revisión de evaluaciones de desempeño</p>
+</div>
+
+<div *ngIf="mensaje" class="alert" [class.alert-error]="esError" [class.alert-success]="!esError">{{ mensaje }}</div>
+
+<div class="toolbar">
+  <div class="toolbar-left">
+    <input type="text" [(ngModel)]="busqueda" placeholder="Buscar por ID, pasantía u observación..." class="input-search">
+  </div>
+  <div class="toolbar-right">
+    <button class="btn btn-primary" (click)="nuevaEvaluacion()"><span class="material-icons">add</span> Nueva Evaluación</button>
+  </div>
+</div>
+
+<div class="table-container" *ngIf="!cargando">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>ID Pasantía</th>
+        <th>ID Rúbrica</th>
+        <th>ID Tutor</th>
+        <th>Fecha</th>
+        <th>Puntaje Total</th>
+        <th>Observación</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let e of evaluacionesFiltradas">
+        <td>{{ e.idEvaluacion }}</td>
+        <td>{{ e.idPasantia }}</td>
+        <td>{{ e.idRubrica }}</td>
+        <td>{{ e.idTutorEmpresarial }}</td>
+        <td>{{ e.fechaEvaluacion | date:'dd/MM/yyyy' }}</td>
+        <td>{{ e.puntajeTotal ?? '—' }}</td>
+        <td class="obs-cell">{{ e.observacionGeneral || '—' }}</td>
+        <td class="acciones">
+          <button class="btn-icon btn-edit" (click)="editarEvaluacion(e)" title="Editar">
+            <span class="material-icons">edit</span>
+          </button>
+          <button class="btn-icon btn-delete" (click)="eliminarEvaluacion(e)" title="Eliminar">
+            <span class="material-icons">delete</span>
+          </button>
+        </td>
+      </tr>
+      <tr *ngIf="evaluacionesFiltradas.length === 0">
+        <td colspan="8" class="empty-row">No se encontraron evaluaciones.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div *ngIf="cargando" class="loading"><span class="material-icons spin">sync</span> Cargando...</div>
+
+<!-- Modal Evaluación -->
+<div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ esNuevo ? 'Nueva Evaluación' : 'Editar Evaluación' }}</h2>
+      <button class="btn-icon" (click)="cerrarModal()"><span class="material-icons">close</span></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>ID Pasantía</label>
+          <input type="number" [(ngModel)]="evaluacionEditando.idPasantia" min="1">
+        </div>
+        <div class="form-group">
+          <label>ID Rúbrica</label>
+          <input type="number" [(ngModel)]="evaluacionEditando.idRubrica" min="1">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>ID Tutor Empresarial</label>
+          <input type="number" [(ngModel)]="evaluacionEditando.idTutorEmpresarial" min="1">
+        </div>
+        <div class="form-group">
+          <label>Puntaje Total</label>
+          <input type="number" [(ngModel)]="evaluacionEditando.puntajeTotal" min="0" max="100" step="0.1">
+        </div>
+      </div>
+      <div class="form-group full">
+        <label>Fecha Evaluación</label>
+        <input type="date" [(ngModel)]="evaluacionEditando.fechaEvaluacion">
+      </div>
+      <div class="form-group full">
+        <label>Observación General</label>
+        <textarea [(ngModel)]="evaluacionEditando.observacionGeneral" rows="3" placeholder="Observaciones..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+      <button class="btn btn-primary" (click)="guardarEvaluacion()" [disabled]="guardando">
+        {{ guardando ? 'Guardando...' : 'Guardar' }}
+      </button>
+    </div>
+  </div>
+</div>

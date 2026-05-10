@@ -1,0 +1,47 @@
+<div class="usuarios">
+  <div class="header-row">
+    <h2>Gestión de Usuarios</h2>
+    <div class="filtros">
+      <select [(ngModel)]="filtroRol" (change)="filtrar()">
+        <option [ngValue]="null">Todos los roles</option>
+        <option *ngFor="let rol of roles" [ngValue]="rol.idRol">{{ rol.nombre }}</option>
+      </select>
+    </div>
+  </div>
+
+  <div *ngIf="mensaje" class="alert" [class.alert-error]="esError" [class.alert-success]="!esError">
+    {{ mensaje }}
+  </div>
+
+  <div class="table-container">
+    <table *ngIf="!cargando && usuarios.length > 0">
+      <thead>
+        <tr>
+          <th>Cédula</th>
+          <th>Nombres</th>
+          <th>Apellidos</th>
+          <th>Email</th>
+          <th>Teléfono</th>
+          <th>Rol</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of usuarios">
+          <td>{{ u.cedula }}</td>
+          <td>{{ u.nombres }}</td>
+          <td>{{ u.apellidos }}</td>
+          <td>{{ u.email }}</td>
+          <td>{{ u.telefono || '-' }}</td>
+          <td><span class="badge">{{ getNombreRol(u.idRol) }}</span></td>
+          <td>
+            <button class="btn-action btn-danger" (click)="desactivar(u.idUsuario)">Desactivar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p *ngIf="!cargando && usuarios.length === 0" class="empty">No se encontraron usuarios.</p>
+    <p *ngIf="cargando" class="loading">Cargando...</p>
+  </div>
+</div>

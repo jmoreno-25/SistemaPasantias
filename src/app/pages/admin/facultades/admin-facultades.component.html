@@ -1,0 +1,101 @@
+<div class="page-header">
+  <h1>Facultades y Carreras</h1>
+  <p>Administrar estructura académica</p>
+</div>
+
+<div *ngIf="mensaje" class="alert" [class.alert-error]="esError" [class.alert-success]="!esError">{{ mensaje }}</div>
+
+<!-- Sección Facultades -->
+<div class="section">
+  <div class="section-header">
+    <h2>Facultades</h2>
+    <button class="btn btn-primary" (click)="nuevaFacultad()"><span class="material-icons">add</span> Nueva Facultad</button>
+  </div>
+  <div class="chips-container">
+    <div *ngFor="let f of facultades" class="chip" [class.active]="facultadSeleccionada === f.idFacultad"
+         (click)="facultadSeleccionada = f.idFacultad; cargarCarreras()">
+      {{ f.nombre }}
+      <button class="chip-action" (click)="editarFacultad(f); $event.stopPropagation()" title="Editar">
+        <span class="material-icons">edit</span>
+      </button>
+      <button class="chip-action delete" (click)="eliminarFacultad(f); $event.stopPropagation()" title="Eliminar">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+    <div class="chip" [class.active]="!facultadSeleccionada" (click)="facultadSeleccionada = null; cargarCarreras()">Todas</div>
+  </div>
+</div>
+
+<!-- Sección Carreras -->
+<div class="section">
+  <div class="section-header">
+    <h2>Carreras</h2>
+    <button class="btn btn-primary" (click)="nuevaCarrera()"><span class="material-icons">add</span> Nueva Carrera</button>
+  </div>
+  <div class="table-container" *ngIf="!cargando">
+    <table class="data-table">
+      <thead>
+        <tr><th>Nombre</th><th>Facultad</th><th>Acciones</th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of carreras">
+          <td>{{ c.nombre }}</td>
+          <td>{{ getNombreFacultad(c.idFacultad) }}</td>
+          <td class="acciones">
+            <button class="btn-icon btn-edit" (click)="editarCarrera(c)"><span class="material-icons">edit</span></button>
+            <button class="btn-icon btn-delete" (click)="eliminarCarrera(c)"><span class="material-icons">delete</span></button>
+          </td>
+        </tr>
+        <tr *ngIf="carreras.length === 0"><td colspan="3" class="empty-row">No hay carreras.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div *ngIf="cargando" class="loading"><span class="material-icons spin">sync</span> Cargando...</div>
+</div>
+
+<!-- Modal Facultad -->
+<div class="modal-overlay" *ngIf="mostrarModalFac" (click)="cerrarModalFac()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ esNuevoFac ? 'Nueva Facultad' : 'Editar Facultad' }}</h2>
+      <button class="btn-icon" (click)="cerrarModalFac()"><span class="material-icons">close</span></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group full">
+        <label>Nombre de la Facultad</label>
+        <input type="text" [(ngModel)]="facEditando.nombre" placeholder="Ej: Ingeniería">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="cerrarModalFac()">Cancelar</button>
+      <button class="btn btn-primary" (click)="guardarFacultad()" [disabled]="guardandoFac">{{ guardandoFac ? 'Guardando...' : 'Guardar' }}</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Carrera -->
+<div class="modal-overlay" *ngIf="mostrarModalCar" (click)="cerrarModalCar()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ esNuevoCar ? 'Nueva Carrera' : 'Editar Carrera' }}</h2>
+      <button class="btn-icon" (click)="cerrarModalCar()"><span class="material-icons">close</span></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group full">
+        <label>Nombre de la Carrera</label>
+        <input type="text" [(ngModel)]="carEditando.nombre" placeholder="Ej: Ingeniería en Sistemas">
+      </div>
+      <div class="form-group full">
+        <label>Facultad</label>
+        <select [(ngModel)]="carEditando.idFacultad">
+          <option [ngValue]="0" disabled>Seleccione...</option>
+          <option *ngFor="let f of facultades" [ngValue]="f.idFacultad">{{ f.nombre }}</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="cerrarModalCar()">Cancelar</button>
+      <button class="btn btn-primary" (click)="guardarCarrera()" [disabled]="guardandoCar">{{ guardandoCar ? 'Guardando...' : 'Guardar' }}</button>
+    </div>
+  </div>
+</div>

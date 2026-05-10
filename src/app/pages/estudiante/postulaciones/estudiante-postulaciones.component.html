@@ -1,0 +1,56 @@
+<!-- Cabecera -->
+<div class="page-header">
+  <div>
+    <h1>Mis Postulaciones</h1>
+    <p>Estado de tus postulaciones a ofertas de pasantía</p>
+  </div>
+</div>
+
+<!-- Cargando -->
+<div *ngIf="cargando" class="estado-central">
+  <span class="material-icons spin">sync</span>
+  <p>Cargando postulaciones...</p>
+</div>
+
+<!-- Error -->
+<div *ngIf="!cargando && error" class="estado-central">
+  <span class="material-icons">error_outline</span>
+  <p>{{ error }}</p>
+</div>
+
+<!-- Sin postulaciones -->
+<div *ngIf="!cargando && !error && postulaciones.length === 0" class="estado-central">
+  <span class="material-icons">inbox</span>
+  <p>Aún no has postulado a ninguna oferta.</p>
+</div>
+
+<!-- Lista de postulaciones -->
+<div class="post-lista" *ngIf="!cargando && postulaciones.length > 0">
+  <div class="post-card" *ngFor="let p of postulaciones">
+    <div class="post-icono">
+      <span class="material-icons">{{ getEstadoIcon(p.estado) }}</span>
+    </div>
+    <div class="post-info">
+      <h3 class="post-titulo">{{ p.tituloOferta || 'Oferta de pasantía' }}</h3>
+      <p class="post-empresa">
+        <span class="material-icons">business</span>
+        {{ p.nombreEmpresa || '—' }}
+      </p>
+      <p class="post-fecha" *ngIf="p.fecha">
+        <span class="material-icons">event</span>
+        Postulado el {{ p.fecha | date:'dd/MM/yyyy' }}
+      </p>
+      <a *ngIf="p.cvUrl" [href]="p.cvUrl" target="_blank" class="cv-link">
+        <span class="material-icons">picture_as_pdf</span> Ver CV adjunto
+      </a>
+      <span *ngIf="!p.cvUrl" class="cv-sin">
+        <span class="material-icons">info</span> Sin CV adjunto — sube tu CV en tu perfil
+      </span>
+    </div>
+    <div class="post-estado">
+      <span class="badge-estado" [ngClass]="getEstadoClass(p.estado)">
+        {{ p.estado }}
+      </span>
+    </div>
+  </div>
+</div>

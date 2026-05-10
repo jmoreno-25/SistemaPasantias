@@ -1,0 +1,137 @@
+.registro-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1e3a5f 0%, #2d6a9f 100%);
+  padding: 20px;
+}
+
+.section-label {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #1e3a5f;
+  margin: 10px 0 6px;
+  padding-bottom: 4px;
+  border-bottom: 2px solid #2d6a9f;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.registro-card {
+  background: #fff;
+  padding: 36px 40px;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  width: 100%;
+  max-width: 560px;
+}
+
+.registro-card h2 {
+  text-align: center;
+  color: #1e3a5f;
+  margin-bottom: 4px;
+  font-size: 1.5rem;
+}
+
+.subtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #333;
+  font-size: 0.85rem;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #2d6a9f;
+  box-shadow: 0 0 0 3px rgba(45,106,159,0.15);
+}
+
+.btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.btn-primary {
+  background-color: #1e3a5f;
+  color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #2d6a9f;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.alert {
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-bottom: 14px;
+  font-size: 0.88rem;
+}
+
+.alert-error {
+  background-color: #fde8e8;
+  color: #c62828;
+  border: 1px solid #f5c6c6;
+}
+
+.alert-success {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+}
+
+.link-login {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.link-login a {
+  color: #2d6a9f;
+  text-decoration: none;
+  font-weight: 600;
+}

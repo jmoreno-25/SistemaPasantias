@@ -1,0 +1,56 @@
+<div class="pasantias-page">
+  <div class="page-header">
+    <h1 class="page-title">Pasantías</h1>
+    <button class="btn-filter">
+      <span class="material-icons">tune</span>
+    </button>
+  </div>
+
+  <div class="cards-grid">
+    <div class="pasantia-card" *ngFor="let p of pasantiasPaginadas">
+      <!-- Card Header -->
+      <div class="card-header">
+        <span class="estado-badge"
+              [class.estado-abierta]="p.estado === 'Abierta'"
+              [class.estado-cerrada]="p.estado === 'Cerrada'">
+          {{ p.estado }}
+        </span>
+        <span class="tiempo">{{ p.tiempoPublicacion }}</span>
+      </div>
+
+      <!-- Card Logo -->
+      <div class="card-logo" [style.background]="p.colorLogo">
+        <span class="material-icons logo-icon">{{ p.iconoEmpresa }}</span>
+        <span class="empresa-nombre">{{ p.empresa }}</span>
+      </div>
+
+      <!-- Card Body -->
+      <div class="card-body">
+        <span class="carrera-text">{{ p.carrera }}</span>
+        <h3 class="puesto-text">{{ p.puesto }}</h3>
+        <div class="card-footer">
+          <span class="duracion">Duracion: {{ p.duracion }}</span>
+          <button class="btn-aplicar" (click)="aplicar(p)" [disabled]="p.estado === 'Cerrada'">
+            Aplicar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Paginacion -->
+  <div class="paginacion" *ngIf="totalPaginas > 1">
+    <button class="pag-btn" (click)="irAPagina(paginaActual - 1)" [disabled]="paginaActual === 1">
+      <span class="material-icons">chevron_left</span>
+    </button>
+    <button *ngFor="let pag of paginas"
+            class="pag-btn pag-num"
+            [class.pag-active]="pag === paginaActual"
+            (click)="irAPagina(pag)">
+      {{ pag }}
+    </button>
+    <button class="pag-btn" (click)="irAPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">
+      <span class="material-icons">chevron_right</span>
+    </button>
+  </div>
+</div>

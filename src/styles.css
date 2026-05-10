@@ -1,0 +1,22 @@
+/* Estilos globales - Sistema de Pasantías */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 16px;
+  color: #333;
+  background: #f0f2f5;
+}
+
+html, body {
+  height: 100%;
+}
+
+.material-icons {
+  font-size: 22px;
+  vertical-align: middle;
+}

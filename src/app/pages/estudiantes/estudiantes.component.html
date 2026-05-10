@@ -1,0 +1,45 @@
+<div class="estudiantes-page">
+  <h1 class="page-title">Estudiantes</h1>
+
+  <div class="table-wrapper">
+    <table *ngIf="!cargando && estudiantes.length > 0">
+      <thead>
+        <tr>
+          <th>Nro</th>
+          <th>Nombres</th>
+          <th>Apellidos</th>
+          <th>Cedula</th>
+          <th>Facultad</th>
+          <th>Carrera</th>
+          <th>Semestre</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let est of estudiantes; let i = index" (click)="verDetalle(est)" class="tr-clickable">
+          <td>{{ i + 1 }}</td>
+          <td>{{ est.nombres }}</td>
+          <td>{{ est.apellidos }}</td>
+          <td>{{ est.cedula }}</td>
+          <td>{{ getNombreFacultad(est.idFacultad) }}</td>
+          <td>{{ getNombreCarrera(est.idCarrera) }}</td>
+          <td>{{ est.semestre || 'N/A' }}</td>
+          <td>
+            <span class="estado-badge" [ngClass]="getEstadoClass(est.estado || 'Sin iniciar')">
+              {{ est.estado || 'Sin iniciar' }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="!cargando && estudiantes.length === 0" class="empty-state">
+      <span class="material-icons">school</span>
+      <p>No se encontraron estudiantes registrados.</p>
+    </div>
+
+    <div *ngIf="cargando" class="loading-state">
+      <p>Cargando estudiantes...</p>
+    </div>
+  </div>
+</div>

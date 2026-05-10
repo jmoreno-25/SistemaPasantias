@@ -1,0 +1,162 @@
+<!-- Cabecera -->
+<div class="page-header">
+  <div>
+    <h1>Pasantías</h1>
+    <p>Explora las ofertas publicadas por las empresas</p>
+  </div>
+  <div class="header-actions">
+    <div class="search-wrap">
+      <span class="material-icons search-icon">search</span>
+      <input type="text" [(ngModel)]="busqueda" (ngModelChange)="onBusquedaChange()"
+        placeholder="Buscar por título, empresa o lugar..." class="input-search">
+    </div>
+  </div>
+</div>
+
+<!-- Cargando -->
+<div *ngIf="cargando" class="estado-central">
+  <span class="material-icons spin">sync</span>
+  <p>Cargando ofertas...</p>
+</div>
+
+<!-- Sin resultados -->
+<div *ngIf="!cargando && ofertasFiltradas.length === 0" class="estado-central">
+  <span class="material-icons">work_off</span>
+  <p>No hay ofertas disponibles en este momento.</p>
+</div>
+
+<!-- Grid de tarjetas -->
+<div class="ofertas-grid" *ngIf="!cargando && ofertasFiltradas.length > 0">
+  <div class="oferta-card" *ngFor="let o of ofertasPaginadas" (click)="verDetalle(o)">
+
+    <!-- Zona logo empresa -->
+    <div class="card-logo-area" [style.background]="getColorEmpresa(o.nombreEmpresa)">
+      <span class="badge-estado" [class.badge-abierta]="o.estado === 'Abierta'" [class.badge-cerrada]="o.estado !== 'Abierta'">{{ o.estado }}</span>
+      <span class="card-tiempo">{{ tiempoRelativo(o.fechaCreacion || o.fechaInicio) }}</span>
+      <div class="empresa-logo-letras">{{ getInitiales(o.nombreEmpresa) }}</div>
+      <div class="empresa-nombre-logo">{{ o.nombreEmpresa || 'Empresa' }}</div>
+    </div>
+
+    <!-- Zona info -->
+    <div class="card-body">
+      <p class="card-modalidad">{{ o.modalidad || 'Pasantía' }}{{ o.lugar ? ' · ' + o.lugar : '' }}</p>
+      <h3 class="card-titulo">{{ o.titulo || 'Sin título' }}</h3>
+      <p class="card-duracion">
+        <span class="material-icons">schedule</span>
+        Duración: {{ calcularDuracion(o.fechaInicio, o.fechaFin) }}
+      </p>
+      <div class="card-footer-row">
+        <span class="badge-cupos"><span class="material-icons">group</span> {{ o.cupos }} cupo(s)</span>
+        <button class="btn-aplicar"
+          [class.btn-aplicado]="yaPostulado.has(o.idOferta)"
+          [disabled]="yaPostulado.has(o.idOferta) || postulando"
+          (click)="postular(o, $event)">
+          <span class="material-icons">{{ yaPostulado.has(o.idOferta) ? 'check' : 'send' }}</span>
+          {{ yaPostulado.has(o.idOferta) ? 'Aplicado' : 'Aplicar' }}
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Paginación -->
+<div class="paginacion" *ngIf="!cargando && totalPaginas > 1">
+  <button class="pag-btn" [disabled]="paginaActual === 1" (click)="irPagina(paginaActual - 1)">
+    <span class="material-icons">chevron_left</span>
+  </button>
+  <button class="pag-btn" *ngFor="let p of paginas"
+    [class.pag-activa]="p === paginaActual"
+    (click)="irPagina(p)">{{ p }}</button>
+  <button class="pag-btn" [disabled]="paginaActual === totalPaginas" (click)="irPagina(paginaActual + 1)">
+    <span class="material-icons">chevron_right</span>
+  </button>
+</div>
+
+<!-- Panel Detalle lateral -->
+<div class="detalle-overlay" *ngIf="mostrarDetalle" (click)="cerrarDetalle()">
+  <div class="detalle-panel" (click)="$event.stopPropagation()">
+
+    <div class="detalle-header">
+      <h2><span class="material-icons">work</span> Detalle de Oferta</h2>
+      <button class="btn-icon" (click)="cerrarDetalle()"><span class="material-icons">close</span></button>
+    </div>
+
+    <div class="detalle-body" *ngIf="ofertaSeleccionada">
+
+      <div class="det-empresa-row">
+        <div class="det-avatar" [style.background]="getColorEmpresa(ofertaSeleccionada.nombreEmpresa)">
+          {{ getInitiales(ofertaSeleccionada.nombreEmpresa) }}
+        </div>
+        <div>
+          <h3 class="det-titulo">{{ ofertaSeleccionada.titulo || 'Sin título' }}</h3>
+          <p class="det-empresa">{{ ofertaSeleccionada.nombreEmpresa || '—' }}</p>
+        </div>
+      </div>
+
+      <div class="det-badges">
+        <span class="badge-estado badge-abierta" *ngIf="ofertaSeleccionada.estado === 'Abierta'">Abierta</span>
+        <span class="badge-estado badge-cerrada" *ngIf="ofertaSeleccionada.estado !== 'Abierta'">{{ ofertaSeleccionada.estado }}</span>
+        <span class="badge-remu" *ngIf="ofertaSeleccionada.remuneracion"><span class="material-icons">attach_money</span> Remunerada</span>
+        <span class="badge-no-remu" *ngIf="!ofertaSeleccionada.remuneracion">Sin remuneración</span>
+      </div>
+
+      <div class="det-grid">
+        <div class="det-item">
+          <span class="det-label"><span class="material-icons">place</span> Lugar</span>
+          <span class="det-value">{{ ofertaSeleccionada.lugar || '—' }}</span>
+        </div>
+        <div class="det-item">
+          <span class="det-label"><span class="material-icons">laptop</span> Modalidad</span>
+          <span class="det-value">{{ ofertaSeleccionada.modalidad || '—' }}</span>
+        </div>
+        <div class="det-item">
+          <span class="det-label"><span class="material-icons">group</span> Cupos</span>
+          <span class="det-value">{{ ofertaSeleccionada.cupos }}</span>
+        </div>
+        <div class="det-item">
+          <span class="det-label"><span class="material-icons">schedule</span> Duración</span>
+          <span class="det-value">{{ calcularDuracion(ofertaSeleccionada.fechaInicio, ofertaSeleccionada.fechaFin) }}</span>
+        </div>
+        <div class="det-item">
+          <span class="det-label"><span class="material-icons">event</span> Fecha inicio</span>
+          <span class="det-value">{{ ofertaSeleccionada.fechaInicio | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="det-item">
+          <span class="det-label"><span class="material-icons">event_busy</span> Fecha fin</span>
+          <span class="det-value">{{ ofertaSeleccionada.fechaFin | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="det-item" *ngIf="ofertaSeleccionada.nombreResponsable">
+          <span class="det-label"><span class="material-icons">person</span> Responsable</span>
+          <span class="det-value">{{ ofertaSeleccionada.nombreResponsable }}</span>
+        </div>
+      </div>
+
+      <div class="det-desc" *ngIf="ofertaSeleccionada.descripcion">
+        <h4><span class="material-icons">description</span> Descripción</h4>
+        <p>{{ ofertaSeleccionada.descripcion }}</p>
+      </div>
+
+      <!-- Botón postular -->
+      <div class="det-acciones">
+        <p class="msg-exito" *ngIf="mensajePostulacion && yaPostulado.has(ofertaSeleccionada.idOferta)">
+          <span class="material-icons">check_circle</span> {{ mensajePostulacion }}
+        </p>
+        <p class="msg-error" *ngIf="mensajePostulacion && !yaPostulado.has(ofertaSeleccionada.idOferta)">
+          <span class="material-icons">error</span> {{ mensajePostulacion }}
+        </p>
+        <button class="btn-postular"
+          [disabled]="postulando || yaPostulado.has(ofertaSeleccionada.idOferta)"
+          [class.btn-postular-ok]="yaPostulado.has(ofertaSeleccionada.idOferta)"
+          (click)="postular(ofertaSeleccionada, $event)">
+          <span class="material-icons">{{ yaPostulado.has(ofertaSeleccionada.idOferta) ? 'check_circle' : 'send' }}</span>
+          <ng-container *ngIf="postulando">Enviando...</ng-container>
+          <ng-container *ngIf="!postulando && yaPostulado.has(ofertaSeleccionada.idOferta)">Ya postulado</ng-container>
+          <ng-container *ngIf="!postulando && !yaPostulado.has(ofertaSeleccionada.idOferta)">Postular</ng-container>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+

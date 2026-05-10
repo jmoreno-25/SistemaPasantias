@@ -1,0 +1,61 @@
+<div class="page-header">
+  <h1>Ofertas de Pasantía</h1>
+  <p>Ofertas publicadas en el sistema</p>
+</div>
+
+<div class="toolbar">
+  <div class="toolbar-left">
+    <input type="text" [(ngModel)]="busqueda" placeholder="Buscar por título o empresa..." class="input-search">
+    <select [(ngModel)]="filtroEstado" class="select-filtro">
+      <option value="">Todos los estados</option>
+      <option value="Abierta">Abierta</option>
+      <option value="Cerrada">Cerrada</option>
+      <option value="Cancelada">Cancelada</option>
+    </select>
+  </div>
+</div>
+
+<div class="table-container" *ngIf="!cargando">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Título</th>
+        <th>Empresa</th>
+        <th>Modalidad</th>
+        <th>Remunerada</th>
+        <th>Fecha Inicio</th>
+        <th>Fecha Fin</th>
+        <th>Cupos</th>
+        <th>Estado</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let o of ofertasFiltradas">
+        <td>{{ o.titulo }}</td>
+        <td>{{ o.nombreEmpresa || '—' }}</td>
+        <td><span class="badge-modalidad">{{ o.modalidad }}</span></td>
+        <td>
+          <span class="material-icons remunerada-icon"
+            [class.remunerada-si]="o.remuneracion"
+            [class.remunerada-no]="!o.remuneracion"
+            [title]="o.remuneracion ? 'Sí' : 'No'">
+            {{ o.remuneracion ? 'attach_money' : 'money_off' }}
+          </span>
+        </td>
+        <td>{{ o.fechaInicio | date:'dd/MM/yyyy' }}</td>
+        <td>{{ o.fechaFin | date:'dd/MM/yyyy' }}</td>
+        <td>{{ o.cupos }}</td>
+        <td>
+          <span class="badge" [ngClass]="estadoClass(o.estado || '')">{{ o.estado }}</span>
+        </td>
+      </tr>
+      <tr *ngIf="ofertasFiltradas.length === 0">
+        <td colspan="8" class="empty-row">No se encontraron ofertas.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div *ngIf="cargando" class="loading">
+  <span class="material-icons spin">sync</span> Cargando...
+</div>
